@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stalwart Mail Server</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        stalwart: {
+                            bg: '#0b0f19',
+                            card: 'rgba(17, 24, 39, 0.75)',
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.06) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(30, 41, 59, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Countdown Ring Animation */
+        .progress-circle {
+            transition: stroke-dashoffset 0.1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased selection:bg-sky-500 selection:text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <main class="w-full max-w-xl mx-auto my-auto">
+
+        <!-- Auto-Redirect Banner (Hidden by default, shown if cookie exists) -->
+        <div id="redirectBanner" class="hidden mb-6 p-4 rounded-2xl glass-panel border border-sky-500/30 bg-sky-950/20 shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-3.5">
+                    <!-- Progress Countdown Circle -->
+                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-10 h-10">
+                            <circle class="text-slate-800" stroke-width="3" stroke="currentColor" fill="transparent" r="16" cx="20" cy="20"/>
+                            <circle id="progressCircle" class="text-sky-400 progress-circle" stroke-width="3" stroke-dasharray="100.5" stroke-dashoffset="0" stroke-linecap="round" stroke="currentColor" fill="transparent" r="16" cx="20" cy="20"/>
+                        </svg>
+                        <span id="countdownSec" class="absolute font-bold font-mono text-sky-400 text-xs">2</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-100">Saved choice detected</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Redirecting to <span id="targetName" class="text-sky-300 font-medium">/account</span>...</p>
+                    </div>
+                </div>
+
+                <button onclick="cancelAutoRedirect()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition-colors flex-shrink-0">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl">
+            <!-- Stalwart Logo & Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white font-bold shadow-lg shadow-sky-500/20 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Stalwart Mail Server</h1>
+                <p class="text-slate-400 text-sm mt-2">Choose your destination to continue</p>
+            </div>
+
+            <!-- Navigation Actions -->
+            <div class="space-y-4 mb-6">
+                <!-- Account Button -->
+                <a href="/account" onclick="navigateTo(event, '/account', 'account')" class="glass-card rounded-2xl p-5 flex items-center justify-between group block">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-semibold text-white group-hover:text-sky-400 transition-colors">Account Management</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Manage profiles, passwords, and security</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-sky-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+
+                <!-- Webmail Button -->
+                <a href="/webmail" onclick="navigateTo(event, '/webmail', 'webmail')" class="glass-card rounded-2xl p-5 flex items-center justify-between group block">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-semibold text-white group-hover:text-indigo-400 transition-colors">Webmail</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Access inbox, compose, and calendar</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Remember Choice Control -->
+            <div class="flex items-center justify-between pt-2">
+                <label class="inline-flex items-center cursor-pointer space-x-3 select-none">
+                    <input type="checkbox" id="rememberChoiceCheckbox" class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500 relative"></div>
+                    <span class="text-xs font-medium text-slate-300">Remember my choice</span>
+                </label>
+
+                <button id="resetChoiceBtn" onclick="clearPreference()" class="hidden text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                    Reset saved preference
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const COOKIE_NAME = 'stalwart_landing';
+        const COOKIE_MAX_AGE = 31536000; // 1 Year in seconds
+        let countdownTimer = null;
+
+        // Cookie Helpers
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function setCookie(name, value) {
+            document.cookie = `${name}=${value}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+        }
+
+        // Navigation Handler (Handles left click vs middle click / ctrl click)
+        function navigateTo(event, path, choiceKey) {
+            // Allow middle click / ctrl+click / cmd+click to open in new tab normally
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) {
+                if (document.getElementById('rememberChoiceCheckbox').checked) {
+                    setCookie(COOKIE_NAME, choiceKey);
+                }
+                return;
+            }
+
+            event.preventDefault();
+
+            // Set cookie if checkbox is checked, else delete cookie
+            if (document.getElementById('rememberChoiceCheckbox').checked) {
+                setCookie(COOKIE_NAME, choiceKey);
+            } else {
+                deleteCookie(COOKIE_NAME);
+            }
+
+            // Real HTTP Redirect
+            window.location.href = path;
+        }
+
+        // Auto-Redirect Engine
+        function initiateAutoRedirect(savedChoice) {
+            const banner = document.getElementById('redirectBanner');
+            const targetName = document.getElementById('targetName');
+            const countdownSec = document.getElementById('countdownSec');
+            const progressCircle = document.getElementById('progressCircle');
+
+            const targetPath = savedChoice === 'account' ? '/account' : '/webmail';
+            targetName.textContent = targetPath;
+            banner.classList.remove('hidden');
+
+            let remainingSeconds = 2.0;
+            const totalCircumference = 100.5; // 2 * PI * 16
+
+            countdownTimer = setInterval(() => {
+                remainingSeconds -= 0.1;
+                if (remainingSeconds <= 0) {
+                    clearInterval(countdownTimer);
+                    window.location.href = targetPath;
+                } else {
+                    countdownSec.textContent = Math.ceil(remainingSeconds);
+                    const offset = totalCircumference - (remainingSeconds / 2.0) * totalCircumference;
+                    progressCircle.style.strokeDashoffset = offset;
+                }
+            }, 100);
+        }
+
+        function cancelAutoRedirect() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            document.getElementById('redirectBanner').classList.add('hidden');
+        }
+
+        function clearPreference() {
+            cancelAutoRedirect();
+            deleteCookie(COOKIE_NAME);
+            document.getElementById('rememberChoiceCheckbox').checked = false;
+            document.getElementById('resetChoiceBtn').classList.add('hidden');
+        }
+
+        // DOM Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isReset = urlParams.has('reset') || urlParams.has('no-redirect');
+            const savedChoice = getCookie(COOKIE_NAME);
+
+            if (savedChoice) {
+                document.getElementById('rememberChoiceCheckbox').checked = true;
+                document.getElementById('resetChoiceBtn').classList.remove('hidden');
+
+                if (!isReset && (savedChoice === 'account' || savedChoice === 'webmail')) {
+                    initiateAutoRedirect(savedChoice);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
