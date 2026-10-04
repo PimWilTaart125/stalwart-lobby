@@ -1,6 +1,6 @@
 # Stalwart Lobby
 
-A custom web application for Stalwart Mail Server.
+A custom web app for Stalwart, designed to act as a bridge between the Stalwart WebUI and Bulwark Webmail Lite.
 
 ## Installation
 
